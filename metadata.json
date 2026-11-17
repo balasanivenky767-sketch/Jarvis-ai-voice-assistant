@@ -1,0 +1,6 @@
+{
+  "name": "Jarvis AI Assistant",
+  "description": "Real-time, voice-to-voice AI assistant with a witty, sassy female persona powered by Gemini Live API.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
