@@ -17,6 +17,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { JarvisMessageEvent, MessagingConfigStatus } from "../server/messagingService";
+import { apiFetch } from "../config/api";
 
 interface MessagingModalProps {
   isOpen: boolean;
@@ -63,8 +64,8 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
     setIsLoading(true);
     try {
       const [resStatus, resEvents] = await Promise.all([
-        fetch("/api/messaging/status"),
-        fetch("/api/messaging/events"),
+        apiFetch("/api/messaging/status"),
+        apiFetch("/api/messaging/events"),
       ]);
       const dataStatus = await resStatus.json();
       const dataEvents = await resEvents.json();
@@ -97,7 +98,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
   const handleSyncTelegramChats = async () => {
     setIsSyncingChats(true);
     try {
-      const res = await fetch("/api/telegram/sync-chats");
+      const res = await apiFetch("/api/telegram/sync-chats");
       const data = await res.json();
       if (data.chats && data.chats.length > 0) {
         setActionNotice(`Found ${data.chats.length} active Telegram chat(s)!`);
@@ -138,7 +139,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
     setIsSavingConfig(true);
     setActionNotice(null);
     try {
-      const res = await fetch("/api/messaging/configure", {
+      const res = await apiFetch("/api/messaging/configure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -167,7 +168,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
   const handleSetTelegramWebhook = async () => {
     setActionNotice(null);
     try {
-      const res = await fetch("/api/telegram/set-webhook", { method: "POST" });
+      const res = await apiFetch("/api/telegram/set-webhook", { method: "POST" });
       const data = await res.json();
       if (data.success) {
         setActionNotice("Telegram webhook successfully registered with Telegram Bot API!");
@@ -188,7 +189,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
     setIsSendingTg(true);
     setActionNotice(null);
     try {
-      const res = await fetch("/api/telegram/send", {
+      const res = await apiFetch("/api/telegram/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatId: tgChatId, message: tgMessage }),
@@ -216,7 +217,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
     setIsSendingWa(true);
     setActionNotice(null);
     try {
-      const res = await fetch("/api/whatsapp/send", {
+      const res = await apiFetch("/api/whatsapp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ recipient: waRecipient, message: waMessage }),
@@ -238,7 +239,7 @@ export const MessagingModal: React.FC<MessagingModalProps> = ({
 
   const handleClearHistory = async () => {
     try {
-      await fetch("/api/messaging/clear-history", { method: "POST" });
+      await apiFetch("/api/messaging/clear-history", { method: "POST" });
       setEvents([]);
       setActionNotice("Conversation memory and event log cleared.");
     } catch (err) {}

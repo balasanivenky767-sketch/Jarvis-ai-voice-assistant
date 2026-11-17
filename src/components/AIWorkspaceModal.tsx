@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { apiFetch } from "../config/api";
 import {
   X,
   Send,
@@ -186,7 +187,7 @@ export const AIWorkspaceModal: React.FC<AIWorkspaceModalProps> = ({
     setIsRunning(true);
 
     try {
-      const response = await fetch("/api/jarvis/prompt", {
+      const response = await apiFetch("/api/jarvis/prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -311,7 +312,7 @@ export const AIWorkspaceModal: React.FC<AIWorkspaceModalProps> = ({
 
   const handleClearSession = async () => {
     try {
-      await fetch("/api/jarvis/workspace/clear", {
+      await apiFetch("/api/jarvis/workspace/clear", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversationId }),

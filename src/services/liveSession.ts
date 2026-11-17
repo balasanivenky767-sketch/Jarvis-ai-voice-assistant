@@ -1,4 +1,5 @@
 import { AudioStreamer } from "./audioStreamer";
+import { wsUrl } from "../config/api";
 
 export type SessionState = "disconnected" | "connecting" | "listening" | "speaking";
 
@@ -108,13 +109,11 @@ export class LiveSession {
       await this.streamer.startCapture();
 
       // 2. Connect WebSocket
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host;
       const model = encodeURIComponent(this.options.model || "gemini-3.1-flash-live-preview");
       const voice = encodeURIComponent(this.options.voice || "Aoede");
-      const wsUrl = `${protocol}//${host}/api/live?model=${model}&voice=${voice}`;
+      const targetWsUrl = wsUrl(`/api/live?model=${model}&voice=${voice}`);
 
-      this.ws = new WebSocket(wsUrl);
+      this.ws = new WebSocket(targetWsUrl);
 
       this.ws.onopen = () => {
         // Start ping keepalive

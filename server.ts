@@ -49,6 +49,24 @@ const port = parseInt(process.env.PORT || "3000", 10);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Allow cross-origin requests from Capacitor Android/iOS WebViews and local clients
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 const apiKey = process.env.GEMINI_API_KEY || "";
 if (!apiKey) {
   console.warn("⚠️ Warning: GEMINI_API_KEY is not defined in environment variables.");

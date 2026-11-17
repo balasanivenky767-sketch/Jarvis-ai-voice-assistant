@@ -1,5 +1,6 @@
-import React from "react";
-import { X, Volume2, Cpu, Palette, Sparkles, Brain, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Volume2, Cpu, Palette, Sparkles, Brain, Check, Globe, RefreshCw } from "lucide-react";
+import { getServerUrl, setServerUrl, apiFetch, isNativeApp } from "../config/api";
 
 export type AuraTheme = "neon-rose" | "cyber-cyan" | "electric-violet" | "emerald-matrix" | "amber-gold";
 
@@ -50,6 +51,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onToggleHighThinking,
   accentColor,
 }) => {
+  const [backendUrl, setBackendUrl] = useState<string>("");
+  const [urlTestStatus, setUrlTestStatus] = useState<"idle" | "testing" | "ok" | "error">("idle");
+  const [urlTestMsg, setUrlTestMsg] = useState<string>("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setBackendUrl(getServerUrl());
+      setUrlTestStatus("idle");
+      setUrlTestMsg("");
+    }
+  }, [isOpen]);
+
+  const handleSaveAndTestServerUrl = async () => {
+    setServerUrl(backendUrl);
+    setUrlTestStatus("testing");
+    setUrlTestMsg("");
+    try {
+      const res = await apiFetch("/api/health");
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setUrlTestStatus("ok");
+      setUrlTestMsg(data?.status === "ok" ? "Connected to Jarvis Backend" : "Server responded");
+    } catch (err: any) {
+      setUrlTestStatus("error");
+      setUrlTestMsg(err?.message || "Could not reach backend server");
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -198,6 +229,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Backend Server URL (for Mobile APK / Remote Hosting) */}
+          <div className="p-4 rounded-2xl bg-slate-900/60 border border-white/5 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-xs font-mono-code uppercase text-slate-400">
+                <Globe className="w-4 h-4 text-sky-400" />
+                Backend Server URL {isNativeApp() ? "(Android APK)" : "(Optional)"}
+              </label>
+              {urlTestStatus === "ok" && (
+                <span className="text-[10px] font-mono-code text-emerald-400 font-semibold">
+                  ONLINE
+                </span>
+              )}
+              {urlTestStatus === "error" && (
+                <span className="text-[10px] font-mono-code text-rose-400 font-semibold">
+                  UNREACHABLE
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={backendUrl}
+                onChange={(e) => setBackendUrl(e.target.value)}
+                placeholder="https://your-jarvis-server.run.app (blank = same origin)"
+                className="flex-1 px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white font-mono-code focus:outline-none focus:border-sky-500/60"
+              />
+              <button
+                onClick={handleSaveAndTestServerUrl}
+                disabled={urlTestStatus === "testing"}
+                className="px-3 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold flex items-center gap-1.5 transition shrink-0"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${urlTestStatus === "testing" ? "animate-spin" : ""}`} />
+                Save & Test
+              </button>
+            </div>
+            {urlTestMsg && (
+              <p
+                className={`text-[11px] font-mono-code ${
+                  urlTestStatus === "ok" ? "text-emerald-400" : "text-rose-400"
+                }`}
+              >
+                {urlTestMsg}
+              </p>
+            )}
           </div>
         </div>
 

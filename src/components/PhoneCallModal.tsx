@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { CallLifecycleState } from "../server/twilioService";
+import { apiFetch } from "../config/api";
 
 interface PhoneCallModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
 
   const fetchConfigAndCalls = async () => {
     try {
-      const res = await fetch("/api/twilio/calls");
+      const res = await apiFetch("/api/twilio/calls");
       const data = await res.json();
       setConfigStatus(data.config);
       setRecentCalls(data.calls || []);
@@ -74,7 +75,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     setIsSavingConfig(true);
     setConfigSaveMsg(null);
     try {
-      const res = await fetch("/api/twilio/configure", {
+      const res = await apiFetch("/api/twilio/configure", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -104,7 +105,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     setTriggerResult(null);
 
     try {
-      const res = await fetch("/api/twilio/trigger-call", {
+      const res = await apiFetch("/api/twilio/trigger-call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
